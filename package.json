@@ -1,0 +1,27 @@
+{
+  "name": "blockscan",
+  "version": "1.0.0",
+  "description": "Blockchain Scanner",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "blochchain",
+    "crypto",
+    "block",
+    "bot",
+    "blockscan"
+  ],
+  "author": "Kautilya .K",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.3.3",
+    "fs": "0.0.1-security",
+    "https": "^1.0.0",
+    "minimist": "^1.2.0",
+    "request": "^2.88.0",
+    "twit": "^2.2.11",
+    "websocket": "^1.0.29"
+  }
+}
