@@ -50,33 +50,24 @@ var requestLoop = setInterval(() => {
                                 var toOwner = func.setToOwner(transaction);
                                 var tx_str = func.findTX(transaction);
                                 var trans_amount = transaction.amount_usd;
-                                var add_text = '';
-                                var alert_text;
-                                var type_text;
+                                let add_text = '';
+                                let alert_text = '🔴';
+                                let type_text;
                                 //Set alert icons
-                                if(trans_amount < 20000000) {
-                                    alert_text = '🔴';
-                                } else if (trans_amount < 40000000) {
-                                    alert_text = '🚨';
-                                } else if (trans_amount < 80000000) {
-                                    alert_text = '🚨🚨';
-                                } else if ( trans_amount < 100000000) {
-                                    alert_text = '🚨🚨🚨';
-                                } else if (trans_amount < 300000000) {
-                                    alert_text = '🚨🚨🚨🚨';
-                                } else if (trans_amount >= 300000000) {
-                                    alert_text = '🚨🚨🚨🚨🚨';
-                                }
-
                                 if (trans_type == 'transfer') {
                                     type_text = `transferred from ${fromOwner} to ${toOwner}`;
                                 } else if (trans_type == 'burn') {
                                     type_text = `burned at ${fromOwner}`;
+                                    alert_text = '📛';
                                 } else if (trans_type == 'mint') {
                                     type_text = `minted at ${toOwner}`;
+                                    alert_text = '💰';
                                 } else {
                                     type_text = `transferred from ${fromOwner} to ${toOwner}`;
                                 }
+
+                                let multiples = func.setAlertMultiples(transaction);
+                                alert_text = alert_text.repeat(multiples);
 
                                 if(fromOwner == toOwner && fromOwner != 'Unknown Wallet') {
                                     add_text = ` (Internal transfer)`;
@@ -100,7 +91,7 @@ var requestLoop = setInterval(() => {
                                     console.log('Transaction(s) recorded, but too small to tweet.'. red);
                                 }
                             });
-                        //forEach ENDS
+                            //forEach ENDS
 
                         } else {
                             console.log(body);
