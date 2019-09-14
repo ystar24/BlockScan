@@ -7,7 +7,7 @@ const config = require('./config.js');
 process.env.TZ = 'Asia/Kolkata';
 
 //App variables
-var freq = 600000;
+var freq = 300000;
 var url = 'https://api.whale-alert.io/v1/transactions';
 var count = 0;
 
@@ -66,7 +66,6 @@ var requestLoop = setInterval(() => {
                                     type_text = `transferred from ${fromOwner} to ${toOwner}`;
                                 }
 
-                                //Set multiples
                                 let multiples = func.setAlertMultiples(transaction);
                                 alert_text = alert_text.repeat(multiples);
 

@@ -81,6 +81,27 @@ function getMinVal(obj) {
     }
 }
 
+function setAlertMultiples(obj) {
+    var times;
+    var val = obj.amount_usd;
+    switch(val) {
+        case val > 10000000:
+            times = 1;
+            return times;
+        case val > 20000000:
+            times = 2;
+            return times;
+        case val > 50000000:
+            times = 3;
+            return times;
+        case val > 80000000:
+            times = 4;
+            return times;
+        case val > 100000000:
+            times = 5;
+            return times;
+    }
+}
 
 
 module.exports.isJSON = isJSON;
@@ -89,3 +110,4 @@ module.exports.setFromOwner = setFromOwner;
 module.exports.setToOwner = setToOwner;
 module.exports.findTX = findTX;
 module.exports.getMinVal = getMinVal;
+module.exports.setAlertMultiples = setAlertMultiples;
