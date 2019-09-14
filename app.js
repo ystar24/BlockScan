@@ -66,6 +66,7 @@ var requestLoop = setInterval(() => {
                                     type_text = `transferred from ${fromOwner} to ${toOwner}`;
                                 }
 
+                                //Set multiples
                                 let multiples = func.setAlertMultiples(transaction);
                                 alert_text = alert_text.repeat(multiples);
 
