@@ -19,7 +19,9 @@ To get timely updates follow [@BlockScan](https://twitter.com/blockscan) on Twit
 # Version
 
 v1.2 - Sept 14 '19
+
 v1.1 - Sept 13 '19
+
 v1.0 - Sept 10 '19
 
 More functionality coming soon. 
