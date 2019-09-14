@@ -3,7 +3,7 @@ A bot that scans for huge transactions across 6 Blockchain networks.
 
 ![alt text](https://i.imgur.com/KZgUY4P.png)
 
-We all know the crypto market is manipulated by the whales and the early investors. Nearly 70% of the bitcoin are held by under 1000 BTC addresses. A whale of this magnitude can cause a remarkable influence on the market if he decides to either sell or buy his bags. 
+We all know the crypto market is manipulated by the whales and the early investors. Nearly 70% of the bitcoin are held by under 1000 BTC addresses. A whale of this magnitude can cause a remarkable influence on the market if he decides to either sell or buy his bags. This bot will help you get alerted when such a big market movement is prone to occur.
 
 # This bot:
 - Scans 6 different blockchain networks for major transfers real-time
