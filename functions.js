@@ -1,113 +1,108 @@
-//Check isJSON
-function isJSON(str) {
+// Required preloads
+const request = require('request');
+const colors = require('colors');
+var argv = require('minimist')(process.argv.slice(2));
+var func = require('./functions.js')
+const config = require('./config.js');
+process.env.TZ = 'Asia/Kolkata';
+
+//App variables
+var freq = 300000;
+var url = 'https://api.whale-alert.io/v1/transactions';
+var count = 0;
+
+console.log('Scanning the blockchain for entries........'.inverse);
+var requestLoop = setInterval(() => {
+    var now = Math.round((new Date()).getTime() / 1000);
+    var ts = now - 310;
+    var time = new Date();
+    time = time.toLocaleTimeString();
+    var cursor;
+    var body = '';
+    var options = {
+        url: url,
+        method: 'GET',
+        qs: {
+            api_key: 'ijwkV0yuUfgRWfCwt7YxEoEl0x9uNziz',
+            start: ts,
+            min_value: 3500000
+        }
+    };
+    console.log(count);
+    count++;
     try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
+        request(options, (err, res, body) => {
+            if (err) {
+                console.log(err);
+            } else {
+                if (func.isJSON(body)) {
+                    body = JSON.parse(body);
+                    if (body.result == 'success') {
+                        //Do work here
+                        console.log(colors.grey(time));
+                        if (body.count != 0) {
+                            console.log(colors.green(body.count) + ' Transaction(s) are recorded from ' + colors.red(ts) + ' to ' + colors.red(now));
+                            body.transactions.forEach((transaction, index) => {
+                                //For Each transaction in transactions
+                                var trans_type = transaction.transaction_type;
+                                var min_val = func.getMinVal(transaction);
+                                var fromOwner = func.setFromOwner(transaction);
+                                var toOwner = func.setToOwner(transaction);
+                                var tx_str = func.findTX(transaction);
+                                var trans_amount = transaction.amount_usd;
+                                var add_text = '';
+                                var alert_text = '🔴';
+                                var type_text;
+                                //Set alert icons
+                                if (trans_type == 'transfer') {
+                                    type_text = `transferred from ${fromOwner} to ${toOwner}`;
+                                } else if (trans_type == 'burn') {
+                                    type_text = `burned at ${fromOwner}`;
+                                    alert_text = '📛';
+                                } else if (trans_type == 'mint') {
+                                    type_text = `minted at ${toOwner}`;
+                                    alert_text = '💰';
+                                } else {
+                                    type_text = `transferred from ${fromOwner} to ${toOwner}`;
+                                }
+
+                                var multiples = func.setAlertMultiples(transaction);
+                                alert_text = alert_text.repeat(multiples);
+
+                                if(fromOwner == toOwner && fromOwner != 'Unknown Wallet') {
+                                    add_text = ` (Internal transfer)`;
+                                }
+                                if(transaction.amount_usd > min_val) {
+                                    //This is the validated part
+                                    //log to console
+                                    console.log(`${colors.yellow(transaction.amount)} ${transaction.symbol.toUpperCase()} ($${colors.green(trans_amount)}) transferred from ${colors.yellow(transaction.from.address)} (${fromOwner}) to ${colors.yellow(transaction.to.address)} (${toOwner})`);
+
+                                    //Tweet
+                                    config.post('statuses/update', {status: `${alert_text} ${func.formatNumber(transaction.amount)} #${transaction.symbol.toUpperCase()} ($${func.formatNumber(trans_amount)}) ${type_text} ${add_text} \n\n TX: ${tx_str} \n\n #BlockScan #CryptoBot #BlockChain`}, function (err, data, response) {
+                                        if(err) {
+                                            console.log('Error tweeting'.red);
+                                        } else {
+                                            console.log('Tweeted.'.blue);
+                                            console.log(colors.white('\n-------------------------------------------------------------------------------\n'));
+                                        }
+                                    });
+                                    //VALIDATED PART ENDS
+                                } else {
+                                    console.log('Transaction(s) recorded, but too small to tweet.'. red);
+                                }
+                            });
+                            //forEach ENDS
+
+                        } else {
+                            console.log(body);
+                            console.log('No transactions recorded from ' + colors.red(ts) + ' to ' + colors.red(now));
+                            console.log(colors.white('-------------------------------------------------------------------------------'));
+                        }
+                    }
+                }
+            }
+        });
+    } catch (err) {
+        console.log(colors.red(err.message));
     }
-    return true;
-}
-
-
-function formatNumber(num) {
-    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
-}
-
-function setFromOwner(obj) {
-    if (obj.from.owner_type == 'unknown') {
-        return 'Unknown Wallet';
-    } else {
-        return `#${obj.from.owner}`;
-    }
-}
-
-function setToOwner(obj) {
-    if (obj.to.owner_type == 'unknown') {
-        return 'Unknown Wallet';
-    } else {
-        return `#${obj.to.owner}`;
-    }
-}
-
-function findTX(obj) {
-    var tx;
-    switch (obj.blockchain) {
-        case 'bitcoin':
-            tx = `https://www.blockchain.com/btc/tx/${obj.hash}`;
-            return tx;
-            break;
-        case 'ethereum':
-            tx = `https://etherscan.io/tx/0x${obj.hash}`;
-            return tx;
-            break;
-        case 'stellar':
-            tx = `https://stellarchain.io/tx/${obj.hash}`;
-            return tx;
-            break;
-        case 'eos':
-            tx = `https://bloks.io/transaction/${obj.hash}`;
-            return tx;
-            break;
-        case 'ripple':
-            tx = `https://bithomp.com/explorer/${obj.hash}`;
-            return tx;
-            break;
-    }
-}
-
-function getMinVal(obj) {
-    var min_val;
-    switch (obj.blockchain) {
-        case 'bitcoin':
-            min_val = 10000000;
-            return min_val;
-            break;
-        case 'ethereum':
-            min_val = 5000000;
-            return min_val;
-            break;
-        case 'stellar':
-            min_val = 2000000;
-            return min_val;
-            break;
-        case 'eos':
-            min_val = 2000000;
-            return min_val;
-            break;
-        case 'ripple':
-            min_val = 9000000;
-            return min_val;
-            break;
-    }
-}
-
-function setAlertMultiples(obj) {
-    var times;
-    var val = obj.amount_usd;
-    switch(val) {
-        case val > 10000000:
-            times = 1;
-            return times;
-        case val > 20000000:
-            times = 2;
-            return times;
-        case val > 50000000:
-            times = 3;
-            return times;
-        case val > 80000000:
-            times = 4;
-            return times;
-        case val > 100000000:
-            times = 5;
-            return times;
-    }
-}
-
-
-module.exports.isJSON = isJSON;
-module.exports.formatNumber = formatNumber;
-module.exports.setFromOwner = setFromOwner;
-module.exports.setToOwner = setToOwner;
-module.exports.findTX = findTX;
-module.exports.getMinVal = getMinVal;
-module.exports.setAlertMultiples = setAlertMultiples;
+}, freq);
